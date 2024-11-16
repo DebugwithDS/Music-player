@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #F0F5FA;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        body.dark-mode {
+            background-color: #2E3440;
+            color: #ECEFF4;
+        }
+        .music-player {
+            width: 320px;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: #e0e5ec;
+            box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+            text-align: center;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        body.dark-mode .music-player {
+            background-color: #3B4252;
+            box-shadow: 10px 10px 20px #2C313A, -10px -10px 20px #454D5A;
+        }
+        .song-info {
+            margin-bottom: 20px;
+        }
+        .album-cover {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+        }
+        .song-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .song-artist {
+            font-size: 0.9rem;
+            color: #777;
+        }
+        .progress-container {
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background-color: #e0e5ec;
+            box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+        }
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background-color: #FF6B47;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2), -2px -2px 5px #ffffff;
+        }
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #777;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #e0e5ec;
+            border: none;
+            font-size: 1.2rem;
+            color: #333;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, transform 0.1s ease;
+        }
+        .control-btn:active {
+            transform: scale(0.95);
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2), -3px -3px 10px #ffffff;
+        }
+        .control-btn:hover {
+            color: #FF6B47;
+        }
+        .playlist-item{
+            margin-top: 10px;
+          margin-left: 10px;
+            background-color: #e0e5ec;
+            border: none;
+            font-size: 1.2rem;
+            color: #333;
+            box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease, transform 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="music-player">
+        <div class="song-info">
+            <img src="./download.jpeg" alt="Album Cover" class="album-cover">
+            <h3 class="song-title">Closer</h3>
+            <p class="song-artist">The Chainsmokers</p>
+        </div>
+        <div class="progress-container">
+            <input type="range" class="progress-bar" min="0" max="100" value="0">
+        </div>
+        <div class="time-info">
+            <span class="current-time">0:00</span>
+            <span class="total-time">3:45</span>
+        </div>
+        <div class="controls">
+            <button class="control-btn"><i class="fas fa-backward"></i></button>
+            <button class="control-btn play-btn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
+            <button class="control-btn"><i class="fas fa-forward"></i></button><br><br><br>
+            <button class="control-btn" onclick="shuffleSongs()"><i class="fas fa-random"></i></button>
+            <button class="control-btn" onclick="toggleMute()"><i class="fas fa-volume-up"></i></button>
+            <button class="control-btn favorite-btn" onclick="toggleFavorite()"><i class="fas fa-heart"></i></button>
+        </div>
+        <div class="progress-container">
+            <input type="range" class="progress-bar volume-control" min="0" max="100" value="50" onchange="changeVolume(this.value)">
+        </div>
+        <button class="control-btn" onclick="toggleDarkMode()"><i class="fas fa-adjust"></i></button>
+        <div class="playlist">
+            <button class="playlist-item" onclick="playSong('Closer')">Closer</button>
+            <button class="playlist-item" onclick="playSong('Memories')">Memories</button>
+            <button class="playlist-item" onclick="playSong('Levitating')">Levitating</button>
+        </div>
+    </div>
+    <audio id="audio" src="./Closer.mp3"></audio>
+    <script>
+        const audio = document.getElementById('audio');
+
+        function togglePlayPause() {
+            const playBtn = document.querySelector('.play-btn i');
+            if (audio.paused) {
+                audio.play();
+                playBtn.classList.remove('fa-play');
+                playBtn.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playBtn.classList.remove('fa-pause');
+                playBtn.classList.add('fa-play');
+            }
+        }
+
+       
+        function shuffleSongs() {
+            console.log('Shuffling playlist');
+        }
+
+        function changeVolume(value) {
+            audio.volume = value / 100;
+            console.log(`Volume set to: ${value}%`);
+        }
+
+        function toggleMute() {
+            const muteBtn = document.querySelector('.control-btn i.fas.fa-volume-up, .control-btn i.fas.fa-volume-mute');
+            audio.muted = !audio.muted;
+            muteBtn.classList.toggle('fa-volume-up');
+            muteBtn.classList.toggle('fa-volume-mute');
+        }
+
+        function toggleFavorite() {
+            const favBtn = document.querySelector('.favorite-btn i');
+            favBtn.classList.toggle('fas');
+            favBtn.classList.toggle('far');
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function playSong(songTitle) {
+            const titleElement = document.querySelector('.song-title');
+            titleElement.textContent = songTitle;
+            console.log(`Playing ${songTitle}`);
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            const progressBar = document.querySelector('.progress-bar');
+            const currentTime = document.querySelector('.current-time');
+            const totalTime = document.querySelector('.total-time');
+
+            const currentMinutes = Math.floor(audio.currentTime / 60);
+            const currentSeconds = Math.floor(audio.currentTime % 60).toString().padStart(2, '0');
+            currentTime.textContent = `${currentMinutes}:${currentSeconds}`;
+
+            const totalMinutes = Math.floor(audio.duration / 60);
+            const totalSeconds = Math.floor(audio.duration % 60).toString().padStart(2, '0');
+            totalTime.textContent = `${totalMinutes}:${totalSeconds}`;
+
+            progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
+        });
+
+        document.querySelector('.progress-bar').addEventListener('input', (e) => {
+            audio.currentTime = (e.target.value / 100) * audio.duration;
+        });
+    </script>
+</body>
+</html>
